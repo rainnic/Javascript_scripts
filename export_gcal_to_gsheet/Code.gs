@@ -24,7 +24,7 @@ function export_gcal_to_gsheet(){
 
 // SETTINGS
 var calendarID = "PUT_HERE_YOUR_CALENDAR_ID"; //for example j4k34jl65hl5jh3ljj4l3@group.calendar.google.com
-var yourTitle = "Working hours of Nicola Rainiero";
+var sheetTitle = "Working hours of Nicola Rainiero";
 var startingDate = "2018/05/01";
 var endDate = "2018/05/31";
 var holydays = "\
@@ -70,7 +70,7 @@ sheet.clearFormats();
 
 // Header of the sheet
 sheet.getRange(1,1).setValue(events[0].getStartTime()).setNumberFormat("YYYY/MMMM").setHorizontalAlignment("left");
-sheet.getRange(1,2).setValue(yourTitle).setNumberFormat('0').setHorizontalAlignment("left");
+sheet.getRange(1,2).setValue(sheetTitle).setNumberFormat('0').setHorizontalAlignment("left");
   
 sheet.getRange(1,3).setValue(startingDate).setNumberFormat("Fro\\m DD").setHorizontalAlignment("left");
 sheet.getRange(1,4).setValue(endDate).setNumberFormat("To DD").setHorizontalAlignment("left");
