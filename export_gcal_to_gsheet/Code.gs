@@ -22,9 +22,30 @@ function export_gcal_to_gsheet(){
 // https://developers.google.com/apps-script/reference/calendar/calendar-event
 //
 
-var mycal = "justingale2@gmail.com";
+// SETTINGS
+var calendarID = "PUT_HERE_YOUR_CALENDAR_ID"; //for example j4k34jl65hl5jh3ljj4l3@group.calendar.google.com
+var yourTitle = "Working hours of Nicola Rainiero";
+var startingDate = "2018/05/01";
+var endDate = "2018/05/31";
+var holydays = "\
+DATE(YEAR(A1); 1; 1);\
+DATE(YEAR(A1); 1; 6);\
+DATE(YEAR(A1); 4; 1);\
+DATE(YEAR(A1); 4; 2);\
+DATE(YEAR(A1); 4; 25);\
+DATE(YEAR(A1); 5; 1);\
+DATE(YEAR(A1); 6; 2);\
+DATE(YEAR(A1); 6; 13);\
+DATE(YEAR(A1); 8; 15);\
+DATE(YEAR(A1); 11; 1);\
+DATE(YEAR(A1); 12; 8);\
+DATE(YEAR(A1); 12; 25);\
+DATE(YEAR(A1); 12; 26)\
+";
+  
+var mycal = calendarID;
 var cal = CalendarApp.getCalendarById(mycal);
-
+  
 // Optional variations on getEvents
 // var events = cal.getEvents(new Date("January 3, 2014 00:00:00 CST"), new Date("January 14, 2014 23:59:59 CST"));
 // var events = cal.getEvents(new Date("January 3, 2014 00:00:00 CST"), new Date("January 14, 2014 23:59:59 CST"), {search: 'word1'});
@@ -38,41 +59,61 @@ var cal = CalendarApp.getCalendarById(mycal);
 //    {search: 'word1+word2'}        Search for events with word1 AND word2
 //    {search: 'word1+-word2'}       Search for events with word1 AND without word2
 //
-var events = cal.getEvents(new Date("January 12, 2014 00:00:00 CST"), new Date("January 18, 2014 23:59:59 CST"), {search: '-project123'});
+// var events = cal.getEvents(new Date("January 12, 2014 00:00:00 CST"), new Date("January 18, 2014 23:59:59 CST"), {search: '-project123'});
+var events = cal.getEvents(new Date(startingDate+" 00:00:00 UTC +1"), new Date(endDate+" 23:59:59 UTC +1"));
 
 
 var sheet = SpreadsheetApp.getActiveSheet();
 // Uncomment this next line if you want to always clear the spreadsheet content before running - Note people could have added extra columns on the data though that would be lost
-// sheet.clearContents();  
+sheet.clearContents();
+sheet.clearFormats();
 
+// Header of the sheet
+sheet.getRange(1,1).setValue(events[0].getStartTime()).setNumberFormat("YYYY/MMMM").setHorizontalAlignment("left");
+sheet.getRange(1,2).setValue(yourTitle).setNumberFormat('0').setHorizontalAlignment("left");
+  
+sheet.getRange(1,3).setValue(startingDate).setNumberFormat("Fro\\m DD").setHorizontalAlignment("left");
+sheet.getRange(1,4).setValue(endDate).setNumberFormat("To DD").setHorizontalAlignment("left");
+  
 // Create a header record on the current spreadsheet in cells A1:N1 - Match the number of entries in the "header=" to the last parameter
 // of the getRange entry below
-var header = [["Calendar Address", "Event Title", "Event Description", "Event Location", "Event Start", "Event End", "Calculated Duration", "Visibility", "Date Created", "Last Updated", "MyStatus", "Created By", "All Day Event", "Recurring Event"]]
-var range = sheet.getRange(1,1,1,14);
+var header = [["Day", "Title", "Start", "End", "Duration", "Description", "Location"]]
+var range = sheet.getRange(2,1,1,7);
 range.setValues(header);
 
   
 // Loop through all calendar events found and write them out starting on calulated ROW 2 (i+2)
 for (var i=0;i<events.length;i++) {
-var row=i+2;
+var row=i+3;
 var myformula_placeholder = '';
 // Matching the "header=" entry above, this is the detailed row entry "details=", and must match the number of entries of the GetRange entry below
 // NOTE: I've had problems with the getVisibility for some older events not having a value, so I've had do add in some NULL text to make sure it does not error
-var details=[[mycal,events[i].getTitle(), events[i].getDescription(), events[i].getLocation(), events[i].getStartTime(), events[i].getEndTime(), myformula_placeholder, ('' + events[i].getVisibility()), events[i].getDateCreated(), events[i].getLastUpdated(), events[i].getMyStatus(), events[i].getCreators(), events[i].isAllDayEvent(), events[i].isRecurringEvent()]];
-var range=sheet.getRange(row,1,1,14);
+var details=[[events[i].getStartTime(), events[i].getTitle(), events[i].getStartTime(), events[i].getEndTime(), myformula_placeholder, events[i].getDescription(), events[i].getLocation()]];
+var range=sheet.getRange(row,1,1,7);
 range.setValues(details);
 
 // Writing formulas from scripts requires that you write the formulas separate from non-formulas
-// Write the formula out for this specific row in column 7 to match the position of the field myformula_placeholder from above: foumula over columns F-E for time calc
-var cell=sheet.getRange(row,7);
-cell.setFormula('=(HOUR(F' +row+ ')+(MINUTE(F' +row+ ')/60))-(HOUR(E' +row+ ')+(MINUTE(E' +row+ ')/60))');
+// Write the formula out for this specific row in column 7 to match the position of the field myformula_placeholder from above: foumula over columns E-D for time calc
+var cell=sheet.getRange(row,5);
+cell.setFormula('=((DAY(D' +row+ ')*24+HOUR(D' +row+ ')+(MINUTE(D' +row+ ')/60))-(DAY(C' +row+ ')*24+HOUR(C' +row+ ')+(MINUTE(C' +row+ ')/60)))');
 cell.setNumberFormat('.00');
 
 }
+  
+var totalRows = sheet.getLastRow();
+var firstRowDate = 3;
+
+for (var i=firstRowDate; i <= totalRows; i+=1){
+    sheet.getRange(i,1).setNumberFormat("-DD-").setHorizontalAlignment("center");
+    sheet.getRange(i,3,totalRows,2).setNumberFormat("HH:mm");
+}
+
+sheet.getRange(totalRows+2,4).setValue('SUM').setNumberFormat('0').setHorizontalAlignment("right");
+sheet.getRange(totalRows+2,5).setFormula('=SUM(E2:E' +totalRows+ ')').setNumberFormat('0.00').setHorizontalAlignment("right"); // sum duration
+  
 }
 function onOpen() {
   Browser.msgBox('App Instructions - Please Read This Message', '1) Click Tools then Script Editor\\n2) Read/update the code with your desired values.\\n3) Then when ready click Run export_gcal_to_gsheet from the script editor.', Browser.Buttons.OK);
 
 }
-
 
