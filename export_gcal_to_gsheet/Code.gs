@@ -60,7 +60,7 @@ var cal = CalendarApp.getCalendarById(mycal);
 //    {search: 'word1+-word2'}       Search for events with word1 AND without word2
 //
 // var events = cal.getEvents(new Date("January 12, 2014 00:00:00 CST"), new Date("January 18, 2014 23:59:59 CST"), {search: '-project123'});
-var events = cal.getEvents(new Date(startingDate+" 00:00:00 UTC +1"), new Date(endDate+" 23:59:59 UTC +1"));
+var events = cal.getEvents(new Date(startingDate+" 00:00:00 UTC +2"), new Date(endDate+" 23:59:59 UTC +2"));
 
 
 var sheet = SpreadsheetApp.getActiveSheet();
