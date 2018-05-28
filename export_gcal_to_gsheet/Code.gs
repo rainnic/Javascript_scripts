@@ -77,7 +77,7 @@ sheet.getRange(1,4).setValue(endDate).setNumberFormat("To DD").setHorizontalAlig
   
 // Create a header record on the current spreadsheet in cells A1:N1 - Match the number of entries in the "header=" to the last parameter
 // of the getRange entry below
-var header = [["Day", "Title", "Start", "End", "Duration", "Description", "Location"]]
+var header = [["Day", "Title", "Start", "End", "Duration (hours)", "Description", "Location"]]
 var range = sheet.getRange(2,1,1,7);
 range.setValues(header);
 
@@ -108,12 +108,11 @@ for (var i=firstRowDate; i <= totalRows; i+=1){
     sheet.getRange(i,3,totalRows,2).setNumberFormat("HH:mm");
 }
 
-sheet.getRange(totalRows+2,4).setValue('SUM').setNumberFormat('0').setHorizontalAlignment("right");
-sheet.getRange(totalRows+2,5).setFormula('=SUM(E2:E' +totalRows+ ')').setNumberFormat('0.00').setHorizontalAlignment("right"); // sum duration
+sheet.getRange(totalRows+2,4).setValue('Σ=').setNumberFormat('0').setHorizontalAlignment("right");
+sheet.getRange(totalRows+2,5).setFormula('=SUM(E2:E' +totalRows+ ')').setNumberFormat('0.00 \\h\\o\\u\\r\\s').setHorizontalAlignment("left"); // sum duration
   
 }
 function onOpen() {
   Browser.msgBox('App Instructions - Please Read This Message', '1) Click Tools then Script Editor\\n2) Read/update the code with your desired values.\\n3) Then when ready click Run export_gcal_to_gsheet from the script editor.', Browser.Buttons.OK);
 
 }
-
