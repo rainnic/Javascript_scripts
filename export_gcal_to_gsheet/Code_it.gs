@@ -24,8 +24,8 @@ function export_gcal_to_gsheet(){
 // IMPOSTAZIONI
 var calendarID = "METTI_QUI_IL_TUO_ID_DEL_CALENDARIO"; // del tipo j4k34jl65hl5jh3ljj4l3@group.calendar.google.com
 var sheetTitle = "Ore lavorative di TUO NOME"; // titolo del foglio di calcolo
-var startingDate = "2018/06/01"; // data iniziale formatta in ANNO/MESE/GIORNO
-var endDate = "2018/06/30"; // data finale formatta in ANNO/MESE/GIORNO
+var startingDate = "2018/06/01"; // data iniziale formattata in ANNO/MESE/GIORNO
+var endDate = "2018/06/30"; // data finale formattata in ANNO/MESE/GIORNO
 var holydays = "\
 DATE(YEAR(A1); 1; 1);\
 DATE(YEAR(A1); 1; 6);\
