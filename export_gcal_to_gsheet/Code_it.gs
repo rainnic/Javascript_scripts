@@ -1,32 +1,31 @@
 function export_gcal_to_gsheet(){
 
+// -----------------------------------------------------------
+// Generare un foglio Google dalle voci del proprio calendario
+// -----------------------------------------------------------
+// Lo script originale è stato scritto da Justin Gale
+// e trovato in Export Google Calendar Entries to a Google Spreadsheet (https://www.cloudbakers.com/blog/export-google-calendar-entries-to-a-google-spreadsheet)
 //
-// Export Google Calendar Events to a Google Spreadsheet
-// Original script written by Justin Gale
-// found in Export Google Calendar Entries to a Google Spreadsheet (https://www.cloudbakers.com/blog/export-google-calendar-entries-to-a-google-spreadsheet)
+// Il codice importa gli eventi compresi tra 2 date per un calendario specifico.
+// Registra i risultati nel foglio di calcolo corrente a partire dalla cella A3 che elenca gli eventi,
+// data/ora, ecc., calcola anche la durata dell'evento (tramite la creazione di formule nel foglio di calcolo) e formatta i valori.
 //
-// This code retrieves events between 2 dates for the specified calendar.
-// It logs the results in the current spreadsheet starting at cell A2 listing the events,
-// dates/times, etc and even calculates event duration (via creating formulas in the spreadsheet) and formats the values.
-//
-// I do re-write the spreadsheet header in Row 1 with every run, as I found it faster to delete then entire sheet content,
-// change my parameters, and re-run my exports versus trying to save the header row manually...so be sure if you change
-// any code, you keep the header in agreement for readability!
-//
-// 1. Please modify the value for mycal to be YOUR calendar email address or one visible on your MY Calendars section of your Google Calendar
-// 2. Please modify the values for events to be the date/time range you want and any search parameters to find or omit calendar entires
-// Note: Events can be easily filtered out/deleted once exported from the calendar
+// Nella sezione IMPOSTAZIONI:
+// 1. modifica il valore di calendarID con l'ID del tuo calendario visibile nella sezione I miei calendari di Google Calendar;
+// 2. mdifica i valori per gli eventi in base all'intervallo di data/ora desiderato e qualsiasi parametro di ricerca per trovare o omettere le voci del calendario.
+// Nota: gli eventi possono essere facilmente filtrati/eliminati una volta esportati dal calendario
 // 
-// Reference Websites:
+// Fonti:
 // https://developers.google.com/apps-script/reference/calendar/calendar
 // https://developers.google.com/apps-script/reference/calendar/calendar-event
+// https://rainnic.altervista.org/tag/google-apps-script
 //
 
-// SETTINGS
-var calendarID = "PUT_HERE_YOUR_CALENDAR_ID"; //for example j4k34jl65hl5jh3ljj4l3@group.calendar.google.com
-var sheetTitle = "Working hours of Nicola Rainiero";
-var startingDate = "2018/05/01";
-var endDate = "2018/05/31";
+// IMPOSTAZIONI
+var calendarID = "METTI_QUI_IL_TUO_ID_DEL_CALENDARIO"; // del tipo j4k34jl65hl5jh3ljj4l3@group.calendar.google.com
+var sheetTitle = "Ore lavorative di TUO NOME"; // titolo del foglio di calcolo
+var startingDate = "2018/06/01"; // data iniziale formatta in ANNO/MESE/GIORNO
+var endDate = "2018/06/30"; // data finale formatta in ANNO/MESE/GIORNO
 var holydays = "\
 DATE(YEAR(A1); 1; 1);\
 DATE(YEAR(A1); 1; 6);\
@@ -41,7 +40,7 @@ DATE(YEAR(A1); 11; 1);\
 DATE(YEAR(A1); 12; 8);\
 DATE(YEAR(A1); 12; 25);\
 DATE(YEAR(A1); 12; 26)\
-";
+"; // elenco delle festività nazionali formattate in ANNO/MESE/GIORNO
   
 var mycal = calendarID;
 var cal = CalendarApp.getCalendarById(mycal);
@@ -72,12 +71,12 @@ sheet.clearFormats();
 sheet.getRange(1,1).setValue(events[0].getStartTime()).setNumberFormat("YYYY/MMMM").setHorizontalAlignment("left");
 sheet.getRange(1,2).setValue(sheetTitle).setNumberFormat('0').setHorizontalAlignment("left");
   
-sheet.getRange(1,3).setValue(startingDate).setNumberFormat("Fro\\m DD").setHorizontalAlignment("left");
-sheet.getRange(1,4).setValue(endDate).setNumberFormat("To DD").setHorizontalAlignment("left");
+sheet.getRange(1,3).setValue(startingDate).setNumberFormat("\\Da DD/MM").setHorizontalAlignment("left");
+sheet.getRange(1,4).setValue(endDate).setNumberFormat("A DD/MM").setHorizontalAlignment("left");
   
 // Create a header record on the current spreadsheet in cells A1:N1 - Match the number of entries in the "header=" to the last parameter
 // of the getRange entry below
-var header = [["Day", "Title", "Start", "End", "Duration (hours)", "Description", "Location"]]
+var header = [["Giorno", "Titolo", "Inizio", "Fine", "Durata (ore)", "Descrizione", "Luogo"]]
 var range = sheet.getRange(2,1,1,7);
 range.setValues(header);
 
@@ -104,15 +103,16 @@ var totalRows = sheet.getLastRow();
 var firstRowDate = 3;
 
 for (var i=firstRowDate; i <= totalRows; i+=1){
-    sheet.getRange(i,1).setNumberFormat("-DD-").setHorizontalAlignment("center");
+    sheet.getRange(i,1).setNumberFormat("-DD/MM-").setHorizontalAlignment("center");
     sheet.getRange(i,3,totalRows,2).setNumberFormat("HH:mm");
 }
 
 sheet.getRange(totalRows+2,4).setValue('Σ=').setNumberFormat('0').setHorizontalAlignment("right");
-sheet.getRange(totalRows+2,5).setFormula('=SUM(E2:E' +totalRows+ ')').setNumberFormat('0.00 \\h\\o\\u\\r\\s').setHorizontalAlignment("left"); // sum duration
+sheet.getRange(totalRows+2,5).setFormula('=SUM(E2:E' +totalRows+ ')').setNumberFormat('0.00 \\o\\r\\e').setHorizontalAlignment("left"); // sum duration
   
 }
 function onOpen() {
-  Browser.msgBox('App Instructions - Please Read This Message', '1) Click Tools then Script Editor\\n2) Read/update the code with your desired values.\\n3) Then when ready click Run export_gcal_to_gsheet from the script editor.', Browser.Buttons.OK);
+  Browser.msgBox('Istruzioni - Leggi questo messaggio prima', '1) Clicca Strumenti e poi Editor di script\\n2) Leggi/aggiorna il codice con i tuoi valori.\\n3) Quando pronto clicca su Esegui -> Esegui funzione -> export_gcal_to_gsheet dall`Editor di script.', Browser.Buttons.OK);
 
 }
+
