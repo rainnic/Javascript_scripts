@@ -12,7 +12,7 @@ There are two version:
 
 Check the instructions and updates on my site:
 
- - (google apps script)[https://rainnic.altervista.org/tag/google-apps-script]
+ - [google apps script]()https://rainnic.altervista.org/tag/google-apps-script)
 
 ## Coming soon
 In the next weeks I am going to improve the script by adding new features, in particular the topics may be:
