@@ -17,7 +17,6 @@ Check the instructions and updates on my site:
 ## Coming soon
 In the next weeks I am going to improve the script by adding new features, in particular the topics may be:
 
- - how to alternate background row colours when day changes;
  - how to subdivide and count the hours in nocturnes (from 22 to 6 o'clock) and holidays;
  - how to consider different type of shift depending on the label put in event title and sum it;
  - how to make a sum considering all the introduced variables above;
