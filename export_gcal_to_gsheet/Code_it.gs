@@ -160,7 +160,7 @@ for (var i=firstRowDate; i <= totalRows; i+=1){
     // Codice per l'orario notturno
   
     // Codice per l'orario festivo
-    sheet.getRange(i,totalColumns+2).setFormula('=IF(NETWORKDAYS.INTL(A' +i+ '; A' +i+ '; "0000000";{'+ feast_days +'})=0;E' +i+ ';0)')
+    sheet.getRange(i,totalColumns+2).setFormula('=IF(NETWORKDAYS.INTL(A' +i+ '; A' +i+ '; "0000000";{'+ feast_days +'})=0;E' +i+ ';0)').setHorizontalAlignment("center");
     total_feast_hours = total_feast_hours + sheet.getRange(i,totalColumns+2).getValue();
     // sheet.getRange(i,totalColumns+3).setValue(total_night_hours);
     // Codice per l'orario festivo
