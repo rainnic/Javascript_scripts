@@ -17,8 +17,7 @@ Check the instructions and updates on my site:
 ## Coming soon
 In the next weeks I am going to improve the script by adding new features, in particular the topics may be:
 
- - how to subdivide and count the hours in nocturnes (from 22 to 6 o'clock) and holidays;
  - how to consider different type of shift depending on the label put in event title and sum it;
- - how to make a sum considering all the introduced variables above;
+ - how to make a sum considering all the introduced variables above and an hourly pay rate;
  - how to add a pie chart that summarise all the data.
 

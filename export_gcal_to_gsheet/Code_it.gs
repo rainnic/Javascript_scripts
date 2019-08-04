@@ -22,13 +22,16 @@ function export_gcal_to_gsheet(){
 // IMPOSTAZIONI
 var calendarID = "METTI_QUI_IL_TUO_ID_DEL_CALENDARIO"; // del tipo j4k34jl65hl5jh3ljj4l3@group.calendar.google.com
 var sheetTitle = "Ore lavorate di TUO NOME"; // titolo della tabella
-var startingDate = "2018/06/01"; // data iniziale scritta in ANNO/MESE/GIORNO
-var endDate = "2018/06/30"; // data finale scritta in ANNO/MESE/GIORNO
-var holydays = "\
+var startingDate = "2019/06/01"; // data iniziale scritta in ANNO/MESE/GIORNO
+var endDate = "2019/06/30"; // data finale scritta in ANNO/MESE/GIORNO
+var night_timing = [22, 6]; // intervallo di orario notturno --> night_timing[0]
+var night = 1; // per aggiungere una colonna sul foglio si(1)/no(0)
+var feast = 1; // per aggiungere una colonna sul foglio si(1)/no(0)
+var feast_days = "\
 DATE(YEAR(A1); 1; 1);\
 DATE(YEAR(A1); 1; 6);\
-DATE(YEAR(A1); 4; 1);\
-DATE(YEAR(A1); 4; 2);\
+DATE(YEAR(A1); 4; 21);\
+DATE(YEAR(A1); 4; 22);\
 DATE(YEAR(A1); 4; 25);\
 DATE(YEAR(A1); 5; 1);\
 DATE(YEAR(A1); 6; 2);\
@@ -100,10 +103,31 @@ cell.setFormula('=((DAY(D' +row+ ')*24+HOUR(D' +row+ ')+(MINUTE(D' +row+ ')/60))
 cell.setNumberFormat('.00');
 
 }
-  
+
+// Variabili per determinare la lunghezza e larghezza della tabella
 var totalRows = sheet.getLastRow();
 var totalColumns = sheet.getLastColumn();
 var firstRowDate = 3;
+  
+// Per aggiungere altre voci alla intestazione della tabella
+// Ore notturne
+if (night) {sheet.getRange(2,totalColumns+1).setValue("Ore notturne").setHorizontalAlignment("center").setBackground(headerColor);}
+var total_night_hours = 0;
+// Ore festive
+if (feast) {sheet.getRange(2,totalColumns+2).setValue("Ore festive").setHorizontalAlignment("center").setBackground(headerColor);}
+var total_feast_hours = 0;
+// Giorni lavorati
+var total_working_days = 0;
+  
+// Variabili per determinare la nuova larghezza della tabella da colorare
+if ((night && feast) || (!night && feast)) {
+   var totalColoredColumns = totalColumns+2;
+ } else if (night && !feast) {
+   var totalColoredColumns = totalColumns+1;
+ } else {
+   var totalColoredColumns = totalColumns;
+ }
+  
 // Variabili usate per i colori alternati
 var columnColorCalc = 28;
 var color = firstColor;
@@ -117,24 +141,62 @@ for (var i=firstRowDate; i <= totalRows; i+=1){
     // Codice per i colori alternati
     var workingDay = sheet.getRange(i,columnColorCalc).setFormula('=(DATE(YEAR(A' +i+ ');MONTH(A' +i+ ');DAY(A' +i+ '))-DATE(YEAR(A' +i+ ');1;0))').getValue();
     if( FirstWorkingDay == workingDay ){
-        sheet.getRange(i, 1, 1, totalColumns).setBackground(color);
-    } else if (color == firstColor) { var FirstWorkingDay = sheet.getRange(i,columnColorCalc).setFormula('=(DATE(YEAR(A' +i+ ');MONTH(A' +i+ ');DAY(A' +i+ '))-DATE(YEAR(A' +i+ ');1;0))').getValue(); var color = secondColor; sheet.getRange(i, 1, 1, totalColumns).setBackground(color);
-    } else if (color == secondColor) { var FirstWorkingDay = sheet.getRange(i,columnColorCalc).setFormula('=(DATE(YEAR(A' +i+ ');MONTH(A' +i+ ');DAY(A' +i+ '))-DATE(YEAR(A' +i+ ');1;0))').getValue(); var color = firstColor; sheet.getRange(i, 1, 1, totalColumns).setBackground(color);
+        sheet.getRange(i, 1, 1, totalColoredColumns).setBackground(color);
+    } else if (color == firstColor) { var FirstWorkingDay = sheet.getRange(i,columnColorCalc).setFormula('=(DATE(YEAR(A' +i+ ');MONTH(A' +i+ ');DAY(A' +i+ '))-DATE(YEAR(A' +i+ ');1;0))').getValue(); var color = secondColor; sheet.getRange(i, 1, 1, totalColoredColumns).setBackground(color);
+    } else if (color == secondColor) { var FirstWorkingDay = sheet.getRange(i,columnColorCalc).setFormula('=(DATE(YEAR(A' +i+ ');MONTH(A' +i+ ');DAY(A' +i+ '))-DATE(YEAR(A' +i+ ');1;0))').getValue(); var color = firstColor; sheet.getRange(i, 1, 1, totalColoredColumns).setBackground(color);
     }
     // Codice per i colori alternati
-
+  
+    // Codice per l'orario notturno
+    sheet.getRange(i,totalColumns+1).setFormula('=HOUR(VALUE((MOD((TIME(HOUR(D' +i+ ');MINUTE(D' +i+ ');0))-(TIME(HOUR(C' +i+ ');MINUTE(C' +i+ ');0));1)*24'
+                                                +'-((TIME(HOUR(D' +i+ ');MINUTE(D' +i+ ');0))<(TIME(HOUR(C' +i+ ');MINUTE(C' +i+ ');0)))*('+night_timing[0]+'-'+night_timing[1]+')'
+                                                +'+MEDIAN('+night_timing[1]+';'+night_timing[0]+';(TIME(HOUR(C' +i+ ');'
+                                                +'MINUTE(C' +i+ ');0))*24)-MEDIAN((TIME(HOUR(D' +i+ ');MINUTE(D' +i+ ');0))*24;'+night_timing[1]+';'+night_timing[0]+'))/24))+MINUTE(VALUE((MOD((TIME(HOUR(D' +i+ ');MINUTE(D' +i+ ');0))'
+                                                +'-(TIME(HOUR(D' +i+ ');MINUTE(C' +i+ ');0));1)*24-((TIME(HOUR(D' +i+ ');MINUTE(D' +i+ ');0))<(TIME(HOUR(C' +i+ ');MINUTE(C' +i+ ');0)))*('+night_timing[0]+'-'+night_timing[1]+')'
+                                                +'+MEDIAN('+night_timing[1]+';'+night_timing[0]+';(TIME(HOUR(C' +i+ ');'
+                                                +'MINUTE(C' +i+ ');0))*24)-MEDIAN((TIME(HOUR(D' +i+ ');MINUTE(D' +i+ ');0))*24;'+night_timing[1]+';'+night_timing[0]+'))/24))/60').setNumberFormat('0.00').setHorizontalAlignment("center");
+    total_night_hours = total_night_hours + sheet.getRange(i,totalColumns+1).getValue();
+    // sheet.getRange(i,totalColumns+2).setValue(total_night_hours);
+    // Codice per l'orario notturno
+  
+    // Codice per l'orario festivo
+    sheet.getRange(i,totalColumns+2).setFormula('=IF(NETWORKDAYS.INTL(A' +i+ '; A' +i+ '; "0000000";{'+ feast_days +'})=0;E' +i+ ';0)')
+    total_feast_hours = total_feast_hours + sheet.getRange(i,totalColumns+2).getValue();
+    // sheet.getRange(i,totalColumns+3).setValue(total_night_hours);
+    // Codice per l'orario festivo
 }
 
+// Calcolo giorni lavorati
+  sheet.getRange(totalRows+1,columnColorCalc).setFormula('=COUNTUNIQUE(AB3:AB' +totalRows+ ')').setNumberFormat('0');
+  total_working_days = sheet.getRange(totalRows+1,columnColorCalc).getValue();
+  sheet.getRange(totalRows+1,columnColorCalc).clear(); // Cancella la cella dopo averne salvato il contenuto
+  
 // Puliza delle colonne usate per i calcoli
 for (var i=firstRowDate; i <= totalRows; i+=1){
-    // La colonna usata per cambiare i colori
-    sheet.getRange(i,columnColorCalc).clear();
+    sheet.getRange(i,columnColorCalc).clear();              // La colonna usata per cambiare i colori
+    if (!night) {sheet.getRange(i,totalColumns+1).clear()}; // La colonna usata per le ore notturne
+    if (!feast) {sheet.getRange(i,totalColumns+2).clear()}; // La colonna usata per le ore festive
 }
-  
+
+// Sommatorie  
 sheet.getRange(totalRows+2,4).setValue('Σ=').setNumberFormat('0').setHorizontalAlignment("right");
-sheet.getRange(totalRows+2,5).setFormula('=SUM(E2:E' +totalRows+ ')').setNumberFormat('0.00 \\o\\r\\e').setHorizontalAlignment("left"); // sum duration
+sheet.getRange(totalRows+2,5).setFormula('=SUM(E2:E' +totalRows+ ')').setNumberFormat('0.00 \\o\\r\\e').setHorizontalAlignment("right"); // somma ore totali
+  
+sheet.getRange(totalRows+3,4).setValue('Σnotturne('+night_timing[0]+'-'+night_timing[1]+')=').setNumberFormat('0').setHorizontalAlignment("right");
+sheet.getRange(totalRows+3,5).setValue(total_night_hours).setNumberFormat('0.00 \\o\\r\\e').setHorizontalAlignment("right"); // somma ore notturne
+
+sheet.getRange(totalRows+4,4).setValue('Σfestive=').setNumberFormat('0').setHorizontalAlignment("right");
+sheet.getRange(totalRows+4,5).setValue(total_feast_hours).setNumberFormat('0.00 \\o\\r\\e').setHorizontalAlignment("right"); // somma ore festive
+  
+sheet.getRange(totalRows+6,4).setValue('Σlavorati=').setNumberFormat('0').setHorizontalAlignment("right");
+  if (total_working_days == 1) {
+    sheet.getRange(totalRows+6,5).setValue(total_working_days).setNumberFormat('0 \\g\\i\\o\\r\\n\\o').setHorizontalAlignment("right"); // se 1 mostra il giorno lavorato
+} else {
+    sheet.getRange(totalRows+6,5).setValue(total_working_days).setNumberFormat('0 \\g\\i\\o\\r\\n\\i').setHorizontalAlignment("right"); // somma giorni lavorati totali
+}
   
 }
+  
 function onOpen() {
   Browser.msgBox('Istruzioni - Leggi questo messaggio prima', '1) Clicca Strumenti e poi Editor di script\\n2) Leggi/aggiorna il codice con i tuoi valori.\\n3) Quando pronto clicca su Esegui -> Esegui funzione -> export_gcal_to_gsheet dall`Editor di script.', Browser.Buttons.OK);
 

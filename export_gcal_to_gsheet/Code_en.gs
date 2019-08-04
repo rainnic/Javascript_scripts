@@ -26,9 +26,12 @@ function export_gcal_to_gsheet(){
 // SETTINGS
 var calendarID = "PUT_HERE_YOUR_CALENDAR_ID"; // must be like this example j4k34jl65hl5jh3ljj4l3@group.calendar.google.com
 var sheetTitle = "Working hours of YOUR NAME"; // title of the Spreadsheet
-var startingDate = "2018/06/01"; // starting date formatted in YEAR/MONTH/DAY
-var endDate = "2018/06/30"; // end date formatted in YEAR/MONTH/DAY
-var holydays = "\
+var startingDate = "2019/06/01"; // starting date formatted in YEAR/MONTH/DAY
+var endDate = "2019/06/30"; // end date formatted in YEAR/MONTH/DAY
+var night_timing = [22, 6]; // intervallo di orario notturno --> night_timing[0]
+var night = 1; // to add a column on the final sheet on(1)/off(0)  
+var feast = 1; // to add a column on the final sheet on(1)/off(0)
+var feast_days = "\
 DATE(YEAR(A1); 1; 1);\
 DATE(YEAR(A1); 1; 6);\
 DATE(YEAR(A1); 4; 1);\
@@ -84,7 +87,7 @@ sheet.getRange(1,4).setValue(endDate).setNumberFormat("To MM/DD").setHorizontalA
 // of the getRange entry below
 var header = [["Day", "Title", "Start", "End", "Duration (hours)", "Description", "Location"]]
 var range = sheet.getRange(2,1,1,7);
-range.setValues(header);
+range.setValues(header).setBackground(headerColor);
 
   
 // Loop through all calendar events found and write them out starting on calulated ROW 2 (i+2)
@@ -105,9 +108,30 @@ cell.setNumberFormat('.00');
 
 }
   
+// Variables to fix the dimension of the sheet loaded from Google Calendar
 var totalRows = sheet.getLastRow();
 var totalColumns = sheet.getLastColumn();
 var firstRowDate = 3;
+  
+// To add new columns after the initial others
+// Night hours
+if (night) {sheet.getRange(2,totalColumns+1).setValue("Night hours").setHorizontalAlignment("center").setBackground(headerColor);}
+var total_night_hours = 0;
+// Holiday shift hours
+if (feast) {sheet.getRange(2,totalColumns+2).setValue("Holiday hours").setHorizontalAlignment("center").setBackground(headerColor);}
+var total_feast_hours = 0;
+// Working days
+var total_working_days = 0;
+  
+// To set the new number of columns to paint
+if ((night && feast) || (!night && feast)) {
+   var totalColoredColumns = totalColumns+2;
+ } else if (night && !feast) {
+   var totalColoredColumns = totalColumns+1;
+ } else {
+   var totalColoredColumns = totalColumns;
+ }
+  
 // Variables used to alternate colours
 var columnColorCalc = 28;
 var color = firstColor;
@@ -121,22 +145,59 @@ for (var i=firstRowDate; i <= totalRows; i+=1){
     // Code to alternate colours
     var workingDay = sheet.getRange(i,columnColorCalc).setFormula('=(DATE(YEAR(A' +i+ ');MONTH(A' +i+ ');DAY(A' +i+ '))-DATE(YEAR(A' +i+ ');1;0))').getValue();
     if( FirstWorkingDay == workingDay ){
-        sheet.getRange(i, 1, 1, totalColumns).setBackground(color);
-    } else if (color == firstColor) { var FirstWorkingDay = sheet.getRange(i,columnColorCalc).setFormula('=(DATE(YEAR(A' +i+ ');MONTH(A' +i+ ');DAY(A' +i+ '))-DATE(YEAR(A' +i+ ');1;0))').getValue(); var color = secondColor; sheet.getRange(i, 1, 1, totalColumns).setBackground(color);
-    } else if (color == secondColor) { var FirstWorkingDay = sheet.getRange(i,columnColorCalc).setFormula('=(DATE(YEAR(A' +i+ ');MONTH(A' +i+ ');DAY(A' +i+ '))-DATE(YEAR(A' +i+ ');1;0))').getValue(); var color = firstColor; sheet.getRange(i, 1, 1, totalColumns).setBackground(color);
+        sheet.getRange(i, 1, 1, totalColoredColumns).setBackground(color);
+    } else if (color == firstColor) { var FirstWorkingDay = sheet.getRange(i,columnColorCalc).setFormula('=(DATE(YEAR(A' +i+ ');MONTH(A' +i+ ');DAY(A' +i+ '))-DATE(YEAR(A' +i+ ');1;0))').getValue(); var color = secondColor; sheet.getRange(i, 1, 1, totalColoredColumns).setBackground(color);
+    } else if (color == secondColor) { var FirstWorkingDay = sheet.getRange(i,columnColorCalc).setFormula('=(DATE(YEAR(A' +i+ ');MONTH(A' +i+ ');DAY(A' +i+ '))-DATE(YEAR(A' +i+ ');1;0))').getValue(); var color = firstColor; sheet.getRange(i, 1, 1, totalColoredColumns).setBackground(color);
     }
      // Code to alternate colours
 
+    // Code to count working night hours
+    sheet.getRange(i,totalColumns+1).setFormula('=HOUR(VALUE((MOD((TIME(HOUR(D' +i+ ');MINUTE(D' +i+ ');0))-(TIME(HOUR(C' +i+ ');MINUTE(C' +i+ ');0));1)*24'
+                                                +'-((TIME(HOUR(D' +i+ ');MINUTE(D' +i+ ');0))<(TIME(HOUR(C' +i+ ');MINUTE(C' +i+ ');0)))*('+night_timing[0]+'-'+night_timing[1]+')'
+                                                +'+MEDIAN('+night_timing[1]+';'+night_timing[0]+';(TIME(HOUR(C' +i+ ');'
+                                                +'MINUTE(C' +i+ ');0))*24)-MEDIAN((TIME(HOUR(D' +i+ ');MINUTE(D' +i+ ');0))*24;'+night_timing[1]+';'+night_timing[0]+'))/24))+MINUTE(VALUE((MOD((TIME(HOUR(D' +i+ ');MINUTE(D' +i+ ');0))'
+                                                +'-(TIME(HOUR(D' +i+ ');MINUTE(C' +i+ ');0));1)*24-((TIME(HOUR(D' +i+ ');MINUTE(D' +i+ ');0))<(TIME(HOUR(C' +i+ ');MINUTE(C' +i+ ');0)))*('+night_timing[0]+'-'+night_timing[1]+')'
+                                                +'+MEDIAN('+night_timing[1]+';'+night_timing[0]+';(TIME(HOUR(C' +i+ ');'
+                                                +'MINUTE(C' +i+ ');0))*24)-MEDIAN((TIME(HOUR(D' +i+ ');MINUTE(D' +i+ ');0))*24;'+night_timing[1]+';'+night_timing[0]+'))/24))/60').setNumberFormat('0.00').setHorizontalAlignment("center");
+    total_night_hours = total_night_hours + sheet.getRange(i,totalColumns+1).getValue();
+    // sheet.getRange(i,totalColumns+2).setValue(total_night_hours);
+    // Code to count night hours
+  
+    // Code to count working holiday hours
+    sheet.getRange(i,totalColumns+2).setFormula('=IF(NETWORKDAYS.INTL(A' +i+ '; A' +i+ '; "0000000";{'+ feast_days +'})=0;E' +i+ ';0)')
+    total_feast_hours = total_feast_hours + sheet.getRange(i,totalColumns+2).getValue();
+    // sheet.getRange(i,totalColumns+3).setValue(total_night_hours);
+    // Code to count working holiday hours
+
 }
+  
+// Code to count working days
+  sheet.getRange(totalRows+1,columnColorCalc).setFormula('=COUNTUNIQUE(AB3:AB' +totalRows+ ')').setNumberFormat('0');
+  total_working_days = sheet.getRange(totalRows+1,columnColorCalc).getValue();
+  sheet.getRange(totalRows+1,columnColorCalc).clear(); // To clear the cell after storing the variable
 
 // Clear columns added for calculations
 for (var i=firstRowDate; i <= totalRows; i+=1){
-    // The column used to change the colors
-    sheet.getRange(i,columnColorCalc).clear();
+    sheet.getRange(i,columnColorCalc).clear(); // The column used to change the colors
+    if (!night) {sheet.getRange(i,totalColumns+1).clear()}; // The column used to count night hours
+    if (!feast) {sheet.getRange(i,totalColumns+2).clear()}; // The column used to count holiday hours
 }
 
 sheet.getRange(totalRows+2,4).setValue('Σ=').setNumberFormat('0').setHorizontalAlignment("right");
-sheet.getRange(totalRows+2,5).setFormula('=SUM(E2:E' +totalRows+ ')').setNumberFormat('0.00 \\h\\o\\u\\r\\s').setHorizontalAlignment("left"); // sum duration
+sheet.getRange(totalRows+2,5).setFormula('=SUM(E2:E' +totalRows+ ')').setNumberFormat('0.00 \\h\\o\\u\\r\\s').setHorizontalAlignment("left"); // shows total duration
+  
+sheet.getRange(totalRows+3,4).setValue('Σnight('+night_timing[0]+'-'+night_timing[1]+')=').setNumberFormat('0').setHorizontalAlignment("right");
+sheet.getRange(totalRows+3,5).setValue(total_night_hours).setNumberFormat('0.00 \\h\\o\\u\\r\\s').setHorizontalAlignment("right"); // shows total night hours
+
+sheet.getRange(totalRows+4,4).setValue('Σholiday=').setNumberFormat('0').setHorizontalAlignment("right");
+sheet.getRange(totalRows+4,5).setValue(total_feast_hours).setNumberFormat('0.00 \\h\\o\\u\\r\\s').setHorizontalAlignment("right"); // shows total holiday hours
+  
+sheet.getRange(totalRows+6,4).setValue('Σworking=').setNumberFormat('0').setHorizontalAlignment("right");
+  if (total_working_days == 1) {
+    sheet.getRange(totalRows+6,5).setValue(total_working_days).setNumberFormat('0 \\d\\a\\y').setHorizontalAlignment("right"); // shows total working day
+} else {
+    sheet.getRange(totalRows+6,5).setValue(total_working_days).setNumberFormat('0 \\d\\a\\y\\s').setHorizontalAlignment("right"); // shows total working days
+}
   
 }
 function onOpen() {
