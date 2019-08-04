@@ -25,8 +25,8 @@ var sheetTitle = "Ore lavorate di TUO NOME"; // titolo della tabella
 var startingDate = "2019/06/01"; // data iniziale scritta in ANNO/MESE/GIORNO
 var endDate = "2019/06/30"; // data finale scritta in ANNO/MESE/GIORNO
 var night_timing = [22, 6]; // intervallo di orario notturno --> night_timing[0]
-var night = 1; // per aggiungere una colonna sul foglio si(1)/no(0)
-var feast = 1; // per aggiungere una colonna sul foglio si(1)/no(0)
+var night = 1; // per aggiungere la colonna delle ore notturne sul foglio si(1)/no(0)
+var feast = 1; // per aggiungere la colonna delle ore festive sul foglio si(1)/no(0)
 var feast_days = "\
 DATE(YEAR(A1); 1; 1);\
 DATE(YEAR(A1); 1; 6);\
