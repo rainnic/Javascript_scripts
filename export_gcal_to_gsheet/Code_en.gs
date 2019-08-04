@@ -29,8 +29,8 @@ var sheetTitle = "Working hours of YOUR NAME"; // title of the Spreadsheet
 var startingDate = "2019/06/01"; // starting date formatted in YEAR/MONTH/DAY
 var endDate = "2019/06/30"; // end date formatted in YEAR/MONTH/DAY
 var night_timing = [22, 6]; // intervallo di orario notturno --> night_timing[0]
-var night = 1; // to add a column on the final sheet on(1)/off(0)  
-var feast = 1; // to add a column on the final sheet on(1)/off(0)
+var night = 1; // for adding the night column on the final sheet on(1)/off(0)  
+var feast = 1; // for adding the holiday column on the final sheet on(1)/off(0)
 var feast_days = "\
 DATE(YEAR(A1); 1; 1);\
 DATE(YEAR(A1); 1; 6);\
