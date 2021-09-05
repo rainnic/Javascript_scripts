@@ -22,8 +22,8 @@ function export_gcal_to_gsheet(){
 // IMPOSTAZIONI
 var calendarID = "METTI_QUI_IL_TUO_ID_DEL_CALENDARIO"; // del tipo j4k34jl65hl5jh3ljj4l3@group.calendar.google.com
 var sheetTitle = "Ore lavorate di TUO NOME"; // titolo della tabella
-var startingDate = "2019/06/01"; // data iniziale scritta in ANNO/MESE/GIORNO
-var endDate = "2019/06/30"; // data finale scritta in ANNO/MESE/GIORNO
+var startingDate = "2021/10/01"; // data iniziale scritta in ANNO/MESE/GIORNO
+var endDate = "2021/10/31"; // data finale scritta in ANNO/MESE/GIORNO
 var night_timing = [22, 6]; // intervallo di orario notturno --> night_timing[0]
 var night = 1; // per aggiungere la colonna delle ore notturne sul foglio si(1)/no(0)
 var feast = 1; // per aggiungere la colonna delle ore festive sul foglio si(1)/no(0)
@@ -66,15 +66,20 @@ var cal = CalendarApp.getCalendarById(mycal);
 //
 // var events = cal.getEvents(new Date("January 12, 2014 00:00:00 CST"), new Date("January 18, 2014 23:59:59 CST"), {search: '-project123'});
 var events = cal.getEvents(new Date(startingDate+" 00:00:00 UTC +2"), new Date(endDate+" 23:59:59 UTC +2"));
-
-
 var sheet = SpreadsheetApp.getActiveSheet();
+
 // Uncomment this next line if you want to always clear the spreadsheet content before running - Note people could have added extra columns on the data though that would be lost
 sheet.clearContents();
 sheet.clearFormats();
 
+// Check if calendar is empty
+if (events.length == 0) {
+  startTime = startingDate;
+  sheet.getRange(3,2).setValue('Il calendario è vuoto!').setFontStyle('bold').setHorizontalAlignment("center");
+  } else {startTime = events[0].getStartTime()}
+
 // Header of the sheet
-sheet.getRange(1,1).setValue(events[0].getStartTime()).setNumberFormat("YYYY/MMMM").setHorizontalAlignment("left");
+sheet.getRange(1,1).setValue(startTime).setNumberFormat("YYYY/MMMM").setHorizontalAlignment("left");
 sheet.getRange(1,2).setValue(sheetTitle).setNumberFormat('0').setHorizontalAlignment("left");
   
 sheet.getRange(1,3).setValue(startingDate).setNumberFormat("\\Da DD/MM").setHorizontalAlignment("left");

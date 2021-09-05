@@ -26,8 +26,8 @@ function export_gcal_to_gsheet(){
 // SETTINGS
 var calendarID = "PUT_HERE_YOUR_CALENDAR_ID"; // must be like this example j4k34jl65hl5jh3ljj4l3@group.calendar.google.com
 var sheetTitle = "Worked hours of YOUR NAME"; // title of the Spreadsheet
-var startingDate = "2019/06/01"; // starting date formatted in YEAR/MONTH/DAY
-var endDate = "2019/06/30"; // end date formatted in YEAR/MONTH/DAY
+var startingDate = "2021/10/01"; // starting date formatted in YEAR/MONTH/DAY
+var endDate = "2021/10/31"; // end date formatted in YEAR/MONTH/DAY
 var night_timing = [22, 6]; // intervallo di orario notturno --> night_timing[0]
 var night = 1; // for adding the night column on the final sheet on(1)/off(0)  
 var feast = 1; // for adding the holiday column on the final sheet on(1)/off(0)
@@ -76,8 +76,14 @@ var sheet = SpreadsheetApp.getActiveSheet();
 sheet.clearContents();
 sheet.clearFormats();
 
+// Check if calendar is empty
+if (events.length == 0) {
+  startTime = startingDate;
+  sheet.getRange(3,2).setValue('The calendar is empty!').setFontStyle('bold').setHorizontalAlignment("center");
+  } else {startTime = events[0].getStartTime()}
+
 // Header of the sheet
-sheet.getRange(1,1).setValue(events[0].getStartTime()).setNumberFormat("YYYY/MMMM").setHorizontalAlignment("left");
+sheet.getRange(1,1).setValue(startTime).setNumberFormat("YYYY/MMMM").setHorizontalAlignment("left");
 sheet.getRange(1,2).setValue(sheetTitle).setNumberFormat('0').setHorizontalAlignment("left");
   
 sheet.getRange(1,3).setValue(startingDate).setNumberFormat("Fro\\m MM/DD").setHorizontalAlignment("left");
