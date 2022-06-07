@@ -104,7 +104,8 @@ range.setValues(details);
 // Writing formulas from scripts requires that you write the formulas separate from non-formulas
 // Write the formula out for this specific row in column 7 to match the position of the field myformula_placeholder from above: foumula over columns E-D for time calc
 var cell=sheet.getRange(row,5);
-cell.setFormula('=((DAY(D' +row+ ')*24+HOUR(D' +row+ ')+(MINUTE(D' +row+ ')/60))-(DAY(C' +row+ ')*24+HOUR(C' +row+ ')+(MINUTE(C' +row+ ')/60)))');
+//cell.setFormula('=((DAY(D' +row+ ')*24+HOUR(D' +row+ ')+(MINUTE(D' +row+ ')/60))-(DAY(C' +row+ ')*24+HOUR(C' +row+ ')+(MINUTE(C' +row+ ')/60)))');
+cell.setFormula('=(D'+row+'-C'+row+')*24');
 cell.setNumberFormat('.00');
 
 }
